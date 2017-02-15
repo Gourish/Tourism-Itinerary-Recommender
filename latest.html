@@ -206,7 +206,8 @@
     </div>
     </div>
     <script>
-      markers = []
+      markers = [];
+      green_marker = null;
       function setMapOnAll(map) {
         for (var i = 0; i < markers.length; i++) {
           markers[i].setMap(map);
@@ -254,6 +255,7 @@
                   map:map,
                  //modified  part
                   draggable:true,
+                  icon:"http://maps.google.com/mapfiles/ms/icons/blue-dot.png"//11111111111111111111111111111111111111111111
                 }
             );
 
@@ -345,18 +347,70 @@
       xhr.send(); 
 
      }
+        //55555555555555555555555555555555555555555555555555555555555555
+        //this function changes the color of the marker on map from red to green
+      function find_marker(event)
+      {
+        console.log('inside find_marker');
+         for (var i = markers.length - 1; i >= 0; i--)
+         {
+           //markers[i].setIcon('http://maps.google.com/mapfiles/ms/icons/green-dot.png');
+           //console.log(event.target.parentNode.id);
+           if(markers[i]['title']==event.target.parentNode.id)
+           {
+              if(green_marker==null)
+              {
+                
+                markers[i].setIcon('http://maps.google.com/mapfiles/ms/icons/green-dot.png');
+                green_marker=markers[i];
+                //console.log(green_marker);
+                break;
+              }
+              //if already a place other than the clicked one is in green then following code turns it back to red
+              else
+              {
+                //console.log('green marker is not null');
+                green_marker.setIcon('http://maps.google.com/mapfiles/ms/icons/red-dot.png');
+                markers[i].setIcon('http://maps.google.com/mapfiles/ms/icons/green-dot.png');
+                green_marker=markers[i];
+                break; 
+              }
+           }
+         }
+      }
+
+                                                /*44444444444444444444444444444444444444444444444444444444444444444444444444444
+        this function assigns onclick event on each newly created  row in table      */
+        function click_assigner(id)
+        {
+            row = document.getElementById(id); 
+            console.log(row);
+          //this while loop will check whether the div element is created or not
+            while(true)
+            {
+              if(row!=null)
+              {
+                row.addEventListener('click',find_marker,true);
+                break;
+              }
+              else
+              {
+                row = document.getElementById(id);
+                console.log(row); 
+              }
+            }
+        }
+
 
       function updateinfo()
     {
       if (xhr.readyState == 4 && xhr.status == 200)
       {
-        add = document.getElementById("table");
         data = JSON.parse(xhr.responseText);
         console.log(data);
 
         /* to structure the json object look at line no 154
         */
-
 
         table = document.getElementById("table");
 
@@ -383,20 +437,31 @@
         for(var i=0;i<data.place.length;i++)
         {
           tr = document.createElement("tr");
+          s=i+'';
+          tr.setAttribute("id",data.place[i]['place_name']);
+          //tr.setAttribute("id",s);
           nam= document.createElement("td"); 
           a = document.createElement('a');
           a.setAttribute('href',data.place[i]['url'])
+          //a.setAttribute('href','abc.com');
+
+          //this line causes link to open a new window
+          a.setAttribute('target','_blank');
           a.innerHTML=data.place[i]['place_name'];
+          //a.innerHTML='palace';
           nam.appendChild(a);
 
           rat= document.createElement("td");
           rat.innerHTML = data.place[i]['rating'];
+          //rat.innerHTML = '4.5';
 
           rev = document.createElement("td");
           rev.innerHTML = data.place[i]['review'];
+          //rev.innerHTML = '1500';
 
           timeSpent = document.createElement("td");
-          timeSpent.innerHTML = data.place[i]['avg_time']
+          timeSpent.innerHTML = data.place[i]['avg_time'];
+          //timeSpent.innerHTML = '1.5'
           
           tr.appendChild(nam);
           tr.appendChild(rat);
@@ -408,21 +473,24 @@
           var pos=
           {
               lat:parseFloat(data.place[i]['latitude']) ,
+            //  lat:parseFloat('12.56'+i) ,
               lng:parseFloat(data.place[i]['longitude']) 
+            //  lng:parseFloat('75.89'+i) 
           }
 
           var marker = new google.maps.Marker({
             position: pos,
             map: map,
             title: data.place[i]['name']
+            //title: 'palace'
           });
           map.setCenter(pos);
           markers.push(marker);
-
-          
+          timer = setTimeout(click_assigner,50,data.place[i]['place_name']);       
         }
 
           table.appendChild(tbody);
+
       }
     }
 
